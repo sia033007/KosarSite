@@ -1,0 +1,13 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+<form asp-action="Index" method="post" enctype="multipart/form-data">
+    <input name="IdNumber" type="text" placeholder="شماره ملی خود را وارد کنید" /><br />
+    <input type="file" accept="image/jpeg" name="birthFile" /><br />
+    <input type="file" accept="image/jpeg" name="studyFile" /><br />
+    <input type="file" accept="image/jpeg" name="jobFile" /><br />
+    <button type="submit" class="btn btn-warning">Add</button>
+</form>
+@section Scripts{
+    <partial name="_ValidationScriptsPartial" />
+}

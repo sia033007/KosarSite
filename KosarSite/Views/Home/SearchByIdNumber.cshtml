@@ -1,0 +1,11 @@
+﻿@foreach (var imageBase64String in ViewBag.ImageBase64Strings)
+{
+    if (imageBase64String != null)
+    {
+        <img src="@imageBase64String" alt="Document Image" />
+    }
+    else
+    {
+        <p>No document available</p>
+    }
+}
