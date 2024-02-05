@@ -25,20 +25,26 @@ namespace KosarSite.Controllers
         [HttpPost]
         public async Task<IActionResult> Index(IFormFile birthFile, IFormFile studyFile, IFormFile jobFile, PersonModel personModel)
         {
-            if(birthFile.Length > 500 * 1024 || studyFile.Length > 500 * 1024 || jobFile.Length > 500 * 1024)
+            try
             {
-                ViewBag.error = "حجم فایل نباید از 500 کیلوبایت بیشتر باشد";
-                return View();
+                if (birthFile.Length > 500 * 1024 || studyFile.Length > 500 * 1024 || jobFile.Length > 500 * 1024)
+                {
+                    ViewBag.error = "حجم فایل نباید از 500 کیلوبایت بیشتر باشد";
+                    return View();
+                }
+                personModel.JobDoc = await ConvertFileToByteArray(jobFile);
+                personModel.StudyDoc = await ConvertFileToByteArray(studyFile);
+                personModel.BirthDoc = await ConvertFileToByteArray(birthFile);
+                await _db.PersonModels.AddAsync(personModel);
+                await _db.SaveChangesAsync();
+                TempData["success"] = "عملیات موفقیت آمیز بود";
+
             }
-            personModel.JobDoc = await ConvertFileToByteArray(jobFile);
-            personModel.StudyDoc = await ConvertFileToByteArray(studyFile);
-            personModel.BirthDoc = await ConvertFileToByteArray(birthFile);
-            await _db.PersonModels.AddAsync(personModel);
-            await _db.SaveChangesAsync();
-
+            catch(Exception exp)
+            {
+                TempData["failed"] = "مشکلی رخ داده است";
+            }
             return RedirectToAction("Index");
-
-
         }
         private async Task<byte[]> ConvertFileToByteArray(IFormFile file)
         {
@@ -56,13 +62,13 @@ namespace KosarSite.Controllers
         //    return File(file.BirthDoc, "image/jpeg");
 
         //}
-        public IActionResult Privacy()
+        public IActionResult SearchDoc()
         {
             ViewBag.post = false;
             return View();
         }
         [HttpPost]
-        public IActionResult Privacy(string idNumber)
+        public IActionResult SearchDoc(string idNumber)
         {
             // Verify reCAPTCHA response
             //var recaptchaSecret = "6LeIqmUpAAAAAOlrsuKDfODnFPD8BBLm_-b2aYSt";
@@ -72,7 +78,7 @@ namespace KosarSite.Controllers
 
             //            { "secret", recaptchaSecret },
             //            { "response", recaptchaResponse }
-           
+
             //})).Result;
 
             //if (!response.IsSuccessStatusCode)
@@ -89,12 +95,26 @@ namespace KosarSite.Controllers
             //    // reCAPTCHA verification failed
             //    return BadRequest();
             //}
-
-            var person = _db.PersonModels.FirstOrDefault(p => p.IdNumber == idNumber);
-            ViewBag.person = person;
-            ViewBag.post = true;
-
-            return View(person);
+            try
+            {
+                var person = _db.PersonModels.FirstOrDefault(p => p.IdNumber == idNumber);
+                if(person == null)
+                {
+                    TempData["failed"] = "کاربر یافت نشد";
+                    ViewBag.post = true;
+                    return View();
+                }
+                ViewBag.person = person;
+                ViewBag.post = true;
+                TempData["success"] = "عملیات موفقیت آمیز بود";
+                return View(person);
+            }
+            catch(Exception exp)
+            {
+                TempData["failed"] = "مشکلی رخ داده است";
+                return View();
+            }
+            
         }
         public async Task<IActionResult> ShowJobDoc(string idNumber, string token)
         {
