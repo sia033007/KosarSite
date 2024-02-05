@@ -25,6 +25,11 @@ namespace KosarSite.Controllers
         [HttpPost]
         public async Task<IActionResult> Index(IFormFile birthFile, IFormFile studyFile, IFormFile jobFile, PersonModel personModel)
         {
+            if(birthFile.Length > 500 * 1024 || studyFile.Length > 500 * 1024 || jobFile.Length > 500 * 1024)
+            {
+                ViewBag.error = "حجم فایل نباید از 500 کیلوبایت بیشتر باشد";
+                return View();
+            }
             personModel.JobDoc = await ConvertFileToByteArray(jobFile);
             personModel.StudyDoc = await ConvertFileToByteArray(studyFile);
             personModel.BirthDoc = await ConvertFileToByteArray(birthFile);
@@ -105,13 +110,25 @@ namespace KosarSite.Controllers
         }
         public async Task<IActionResult> ShowStudyDoc(string idNumber, string token)
         {
-            var person = await _db.PersonModels.FirstOrDefaultAsync(p => p.IdNumber == idNumber);
-            return File(person.StudyDoc, "image/jpeg");
+            var sessionToken = HttpContext.Session.GetString("token"); // Retrieve the one-time token from the user's session
+
+            if (token == sessionToken)
+            {
+                var person = await _db.PersonModels.FirstOrDefaultAsync(p => p.IdNumber == idNumber);
+                return File(person.StudyDoc, "image/jpeg");
+            }
+            return Unauthorized();
         }
         public async Task<IActionResult> ShowBirthDoc(string idNumber, string token)
         {
-            var person = await _db.PersonModels.FirstOrDefaultAsync(p => p.IdNumber == idNumber);
-            return File(person.BirthDoc, "image/jpeg");
+            var sessionToken = HttpContext.Session.GetString("token"); // Retrieve the one-time token from the user's session
+
+            if (token == sessionToken)
+            {
+                var person = await _db.PersonModels.FirstOrDefaultAsync(p => p.IdNumber == idNumber);
+                return File(person.BirthDoc, "image/jpeg");
+            }
+            return Unauthorized();
         }
 
 
