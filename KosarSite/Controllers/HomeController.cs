@@ -1,6 +1,7 @@
 ﻿using KosarSite.Data;
 using KosarSite.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.Diagnostics;
 
@@ -56,39 +57,61 @@ namespace KosarSite.Controllers
             return View();
         }
         [HttpPost]
-        public IActionResult Privacy(string idNumber, string recaptchaResponse)
+        public IActionResult Privacy(string idNumber)
         {
             // Verify reCAPTCHA response
-            var recaptchaSecret = "6LeIqmUpAAAAAOlrsuKDfODnFPD8BBLm_-b2aYSt";
-            var client = new HttpClient();
-            var response = client.PostAsync("https://www.google.com/recaptcha/api/siteverify", new FormUrlEncodedContent(new Dictionary<string, string>
-            {
+            //var recaptchaSecret = "6LeIqmUpAAAAAOlrsuKDfODnFPD8BBLm_-b2aYSt";
+            //var client = new HttpClient();
+            //var response = client.PostAsync("https://www.google.com/recaptcha/api/siteverify", new FormUrlEncodedContent(new Dictionary<string, string>
+            //{
 
-                        { "secret", recaptchaSecret },
-                        { "response", recaptchaResponse }
+            //            { "secret", recaptchaSecret },
+            //            { "response", recaptchaResponse }
            
-            })).Result;
+            //})).Result;
 
-            if (!response.IsSuccessStatusCode)
-            {
-                // Handle error
-                return BadRequest();
-            }
+            //if (!response.IsSuccessStatusCode)
+            //{
+            //    // Handle error
+            //    return BadRequest();
+            //}
 
-            var result = response.Content.ReadAsStringAsync().Result;
-            dynamic jsonResult = JsonConvert.DeserializeObject(result);
+            //var result = response.Content.ReadAsStringAsync().Result;
+            //dynamic jsonResult = JsonConvert.DeserializeObject(result);
 
-            if (jsonResult.success != "true")
-            {
-                // reCAPTCHA verification failed
-                return BadRequest();
-            }
+            //if (jsonResult.success != "true")
+            //{
+            //    // reCAPTCHA verification failed
+            //    return BadRequest();
+            //}
 
             var person = _db.PersonModels.FirstOrDefault(p => p.IdNumber == idNumber);
             ViewBag.person = person;
             ViewBag.post = true;
 
             return View(person);
+        }
+        public async Task<IActionResult> ShowJobDoc(string idNumber, string token)
+        {
+            var sessionToken = HttpContext.Session.GetString("token"); // Retrieve the one-time token from the user's session
+
+            if (token == sessionToken)
+            {
+                var person = await _db.PersonModels.FirstOrDefaultAsync(p => p.IdNumber == idNumber);
+                return File(person.JobDoc, "image/jpeg");
+            }
+            return Unauthorized();
+            
+        }
+        public async Task<IActionResult> ShowStudyDoc(string idNumber, string token)
+        {
+            var person = await _db.PersonModels.FirstOrDefaultAsync(p => p.IdNumber == idNumber);
+            return File(person.StudyDoc, "image/jpeg");
+        }
+        public async Task<IActionResult> ShowBirthDoc(string idNumber, string token)
+        {
+            var person = await _db.PersonModels.FirstOrDefaultAsync(p => p.IdNumber == idNumber);
+            return File(person.BirthDoc, "image/jpeg");
         }
 
 

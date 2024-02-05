@@ -1,4 +1,15 @@
-﻿@model PersonModel
+﻿@inject IHttpContextAccessor accessor
+@{
+    ViewData["Title"] = "صفحه مدارک";
+}
+@model PersonModel
+@{
+    var token = Guid.NewGuid().ToString();
+    accessor.HttpContext.Session.SetString("token", token);
+    // var temporaryToken = Guid.NewGuid().ToString(); // Generate a temporary, one-time token
+    // accessor.HttpContext.Session.SetString("TemporaryToken", temporaryToken); // Store the token in the user's session
+    //                                                                           // Set an expiration time for the token (for example, 5 minutes from current time)
+}
 
 @if(ViewBag.person != null)
 {
@@ -19,9 +30,9 @@
         </a>
 
         <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-            <a class="dropdown-item" href="#">مدرک شغلی</a>
-            <a class="dropdown-item" href="#">مدرک تحصیلی</a>
-            <a class="dropdown-item" href="#">مدرک شناسنامه</a>
+            <a class="dropdown-item" onclick="verifyAndRedirect('@Url.Action("ShowJobDoc", "Home", new { idNumber = Model.IdNumber, token = token })')">مدرک شغلی</a>
+            <a class="dropdown-item" onclick="verifyAndRedirect('@Url.Action("ShowStudyDoc", "Home", new { idNumber = Model.IdNumber, token = token })')">مدرک تحصیلی</a>
+            <a class="dropdown-item" onclick="verifyAndRedirect('@Url.Action("ShowBirthDoc", "Home", new { idNumber = Model.IdNumber, token = token })')">مدرک شناسنامه</a>
         </div>
     </div>
 <table class="table table-striped table-bordered text-center">
@@ -56,8 +67,8 @@ else if(ViewBag.person == null && ViewBag.post == true){
 else
 {
     <form method="post" class="text-center mt-5 p-5" id="searchForm">
-        <div class="g-recaptcha" data-sitekey="6LeIqmUpAAAAAKVMvMmUygtqe-4O2RQ2R-XBw7m6"
-             data-callback="onSubmit"></div>
+        @* <div class="g-recaptcha" data-sitekey="6LeIqmUpAAAAAKVMvMmUygtqe-4O2RQ2R-XBw7m6"
+             data-callback="onSubmit"></div> *@
         <input type="hidden" id="recaptchaResponse" name="recaptchaResponse" />
         <div class="input-group text-center">
             <input type="text" asp-for="@Model.IdNumber" placeholder="شماره ملی را وارد کنید" class="form-control text-end" />
@@ -67,13 +78,13 @@ else
         </div>
         <br />
 
-        <button class="btn btn-warning fw-bold" type="button" onclick="submitForm()">جستجو</button>
+        <button class="btn btn-warning fw-bold" type="submit">جستجو</button>
     </form>
 }
 @section Scripts{
     <partial name="_ValidationScriptsPartial" />
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-    <script>
+    @* <script src="https://www.google.com/recaptcha/api.js" async defer></script> *@
+    @* <script>
         function onSubmit(token) {
             document.getElementById("recaptchaResponse").value = token;
         }
@@ -83,6 +94,18 @@ else
                 document.getElementById("searchForm").submit();
             } else {
                 alert("لطفا ابتدا رکپچا را حل کنید");
+            }
+        }
+    </script> *@
+    <script>
+        function verifyAndRedirect(url) {
+            var randomNumber = Math.floor(1000 + Math.random() * 9000); // Generate a random number
+            var userInput = prompt('Please enter the following number to proceed: ' + randomNumber);
+
+            if (userInput === randomNumber.toString()) {
+                window.location.href = url; // Redirect if the input matches the random number
+            } else {
+                alert('The number you entered is not correct. Please try again.'); // Display an error message
             }
         }
     </script>

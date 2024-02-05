@@ -9,7 +9,14 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDb>(o => o.UseSqlServer(builder.Configuration
     .GetConnectionString("DefaultConnection")));
 builder.Services.AddHttpClient();
-builder.Services.AddHCaptcha(builder.Configuration.GetSection("HCaptcha"));
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+builder.Services.AddSession(o =>
+{
+    o.IdleTimeout = TimeSpan.FromMinutes(5);
+    o.Cookie.Name = "KosarCookie";
+    o.Cookie.IsEssential = true;
+    o.Cookie.HttpOnly = true;
+});
 
 
 var app = builder.Build();
@@ -26,6 +33,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+app.UseSession();
 
 app.UseAuthorization();
 
