@@ -1,4 +1,3 @@
-using BenjaminAbt.HCaptcha.AspNetCore;
 using KosarSite.Data;
 using Microsoft.EntityFrameworkCore;
 

@@ -32,6 +32,11 @@ namespace KosarSite.Controllers
                     ViewBag.error = "حجم فایل نباید از 500 کیلوبایت بیشتر باشد";
                     return View();
                 }
+                else if(await _db.PersonModels.AnyAsync(p=> p.IdNumber == personModel.IdNumber))
+                {
+                    TempData["warning"] = "این شماره ملی قبلا ثبت شده است";
+                    return View();
+                }
                 personModel.JobDoc = await ConvertFileToByteArray(jobFile);
                 personModel.StudyDoc = await ConvertFileToByteArray(studyFile);
                 personModel.BirthDoc = await ConvertFileToByteArray(birthFile);
@@ -118,7 +123,7 @@ namespace KosarSite.Controllers
         }
         public async Task<IActionResult> ShowJobDoc(string idNumber, string token)
         {
-            var sessionToken = HttpContext.Session.GetString("token"); // Retrieve the one-time token from the user's session
+            var sessionToken = HttpContext.Session.GetString("token");
 
             if (token == sessionToken)
             {
@@ -130,7 +135,7 @@ namespace KosarSite.Controllers
         }
         public async Task<IActionResult> ShowStudyDoc(string idNumber, string token)
         {
-            var sessionToken = HttpContext.Session.GetString("token"); // Retrieve the one-time token from the user's session
+            var sessionToken = HttpContext.Session.GetString("token");
 
             if (token == sessionToken)
             {
@@ -141,7 +146,7 @@ namespace KosarSite.Controllers
         }
         public async Task<IActionResult> ShowBirthDoc(string idNumber, string token)
         {
-            var sessionToken = HttpContext.Session.GetString("token"); // Retrieve the one-time token from the user's session
+            var sessionToken = HttpContext.Session.GetString("token");
 
             if (token == sessionToken)
             {

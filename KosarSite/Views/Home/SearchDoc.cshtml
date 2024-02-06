@@ -40,8 +40,8 @@
     </div>
 }
 else if(ViewBag.person == null && ViewBag.post == true){
-    <div class="text-center mt-3 p-3">
-        <p class="display-5">کاربری با این مشخصات یافت نشد</p>
+    <div class="text-center mt-5 p-5">
+        <p class="display-5 mt-5 p-5">کاربری با این مشخصات یافت نشد</p>
     </div>
 
 }
@@ -81,7 +81,7 @@ else
     <script>
         function verifyAndRedirect(url) {
             var randomNumber = Math.floor(1000 + Math.random() * 9000); 
-            var userInput = prompt('Please enter the following number to proceed: ' + randomNumber);
+            var userInput = prompt('لطفا عدد مقابل را در فیلد زیر وارد کنید: ' + randomNumber);
 
             if (userInput === randomNumber.toString()) {
                 window.location.href = url;
