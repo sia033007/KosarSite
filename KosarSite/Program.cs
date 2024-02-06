@@ -16,6 +16,13 @@ builder.Services.AddSession(o =>
     o.Cookie.IsEssential = true;
     o.Cookie.HttpOnly = true;
 });
+builder.Services.AddAuthentication("Cookie").AddCookie("Cookie", o =>
+{
+    o.Cookie.Name = "authCookie";
+    o.ExpireTimeSpan = TimeSpan.FromMinutes(5);
+    o.LoginPath = "/Home/Index";
+
+});
 
 
 var app = builder.Build();
@@ -33,6 +40,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 app.UseSession();
+app.UseAuthentication();
 
 app.UseAuthorization();
 

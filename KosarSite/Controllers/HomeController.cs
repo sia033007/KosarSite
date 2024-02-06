@@ -1,9 +1,11 @@
 ﻿using KosarSite.Data;
 using KosarSite.Models;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.Diagnostics;
+using System.Security.Claims;
 
 namespace KosarSite.Controllers
 {
@@ -73,7 +75,7 @@ namespace KosarSite.Controllers
             return View();
         }
         [HttpPost]
-        public IActionResult SearchDoc(string idNumber)
+        public async Task<IActionResult> SearchDoc(string idNumber)
         {
             // Verify reCAPTCHA response
             //var recaptchaSecret = "6LeIqmUpAAAAAOlrsuKDfODnFPD8BBLm_-b2aYSt";
@@ -109,6 +111,13 @@ namespace KosarSite.Controllers
                     ViewBag.post = true;
                     return View();
                 }
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.SerialNumber, idNumber)
+                };
+                var identity = new ClaimsIdentity(claims, "Cookie");
+                var principal = new ClaimsPrincipal(identity);
+                await HttpContext.SignInAsync("Cookie", principal);
                 ViewBag.person = person;
                 ViewBag.post = true;
                 TempData["success"] = "عملیات موفقیت آمیز بود";
@@ -123,9 +132,7 @@ namespace KosarSite.Controllers
         }
         public async Task<IActionResult> ShowJobDoc(string idNumber, string token)
         {
-            var sessionToken = HttpContext.Session.GetString("token");
-
-            if (token == sessionToken)
+            if (User.Identity.IsAuthenticated)
             {
                 var person = await _db.PersonModels.FirstOrDefaultAsync(p => p.IdNumber == idNumber);
                 return File(person.JobDoc, "image/jpeg");
@@ -135,9 +142,7 @@ namespace KosarSite.Controllers
         }
         public async Task<IActionResult> ShowStudyDoc(string idNumber, string token)
         {
-            var sessionToken = HttpContext.Session.GetString("token");
-
-            if (token == sessionToken)
+            if (User.Identity.IsAuthenticated)
             {
                 var person = await _db.PersonModels.FirstOrDefaultAsync(p => p.IdNumber == idNumber);
                 return File(person.StudyDoc, "image/jpeg");
@@ -146,9 +151,7 @@ namespace KosarSite.Controllers
         }
         public async Task<IActionResult> ShowBirthDoc(string idNumber, string token)
         {
-            var sessionToken = HttpContext.Session.GetString("token");
-
-            if (token == sessionToken)
+            if (User.Identity.IsAuthenticated)
             {
                 var person = await _db.PersonModels.FirstOrDefaultAsync(p => p.IdNumber == idNumber);
                 return File(person.BirthDoc, "image/jpeg");

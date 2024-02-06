@@ -10,7 +10,6 @@
 @model PersonModel
 @{
     var token = Guid.NewGuid().ToString();
-    accessor.HttpContext.Session.SetString("token", token);
                                                                             
 }
 
